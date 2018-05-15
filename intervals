@@ -1,0 +1,13 @@
+0,1,1,unison,480,0,0
+1,16,15,minor_semitone,512,16,15
+2,9,8,major_second,540,135,128
+3,6,5,minor_third,576,16,15
+4,5,4,major_third,600,25,24
+5,4,3,perfect_fourth,640,16,15
+6,45,32,diatonic_tritone,675,135,128
+7,3,2,perfect_fifth,720,16,15
+8,8,5,minor_sixth,768,16,15
+9,5,3,major_sixth,800,25,24
+10,9,5,minor_seventh,864,27,25
+11,15,8,major_seventh,900,25,24
+12,2,1,octave,960,16,15
