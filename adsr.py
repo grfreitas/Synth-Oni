@@ -14,7 +14,7 @@ class Envelope:
         return self._apply_envelope(wave)
 
     def _apply_envelope(self, wave):
-        self.sr = getattr(wave, 'sampling_rate', 44100)
+        self.sr = getattr(wave, 'samplerate', 44100)
 
         wave = self._apply_attack(wave)
         wave = self._apply_decay(wave)
