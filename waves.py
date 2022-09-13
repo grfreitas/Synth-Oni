@@ -1,20 +1,30 @@
 import numpy as np
+import pandas as pd
 
 from scipy.signal import sawtooth, square
+from smoothing import smooth
+
+FREQUENCY_DATA = pd.read_csv('utils/notesFrequencies')
+FREQUENCY_MAP = dict(zip(FREQUENCY_DATA.note, FREQUENCY_DATA.frequency))
 
 
 class Wave(np.ndarray):
 
     signal = None
 
-    def __new__(cls, frequency, duration, sampling_rate=44100):
+    def __new__(cls, frequency, duration, samplerate=44100):
 
-        ts = np.arange(0, duration, duration / sampling_rate)
-        domain = 2 * np.pi * frequency * ts
-        cls._set_signal(domain)
+        if isinstance(frequency, str):
+            try:
+                frequency = FREQUENCY_MAP[frequency]
+            except KeyError:
+                raise(f'Note should be one of {FREQUENCY_MAP.keys()}')
+
+        ts = np.arange(0, duration, 1 / samplerate)
+        cls._set_signal(2 * np.pi * frequency * ts)
 
         obj = np.asarray(cls.signal, dtype=np.float32).view(cls)
-        obj.__setattr__('sampling_rate', sampling_rate)
+        obj.__setattr__('samplerate', samplerate)
 
         return obj
 
