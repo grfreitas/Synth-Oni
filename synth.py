@@ -1,4 +1,5 @@
 import random
+from adsr import Envelope
 
 import numpy as np
 import pandas as pd
@@ -21,22 +22,29 @@ WAVEFORM_MAP = {
 
 class Sequential(np.ndarray):
     
-    def __new__(cls, signals=None, name=None, repeat=1):
-        """Parallelizes sound signals.
+    def __new__(cls, signals=None, name=None, repeat=1, samplerate=44100):
+        """Sequentiate sound signals.
 
         Args:
-            signals: Optionals array of signals to parallelize.
+            signals: Optionals array of waves to sequentiate.
             name: Optional name for the signal.
 
         Returns:
-            np.array: Parallelized signals.
+            np.array: Sequentiate signals.
         """
         if signals is None:
             seq = np.array([])
         else:
             if not isinstance(signals, (list, tuple)):
                 signals = [signals]
-            seq = np.tile(np.concatenate(signals), repeat)
+
+            concat = [np.pad(
+                signals[i],
+                pad_width=(np.size(signals[0:i]),
+                           np.size(signals[i+1:])),
+                mode='constant') for i in range(len(signals))]
+
+            seq = np.tile(np.add.reduce(concat), repeat)
 
         obj = np.asarray(seq, dtype=np.float32).view(cls)
         obj.__setattr__('name', name)
@@ -79,16 +87,53 @@ class Arpeggio(np.ndarray):
         return obj
 
 
-class Channel(dict):
+class WaveCreator:
 
-    def __init__(self):
-        pass
+    def __init__(self, envelope) -> None:
+        self.envelope = envelope
 
+    def triangle(self, frequency, key_duration):
+        total_duration = key_duration + self.envelope.releaseTime        
+        return self.envelope(Triangle(frequency, total_duration))
+
+    def sine(self, frequency, key_duration):
+        total_duration = key_duration + self.envelope.releaseTime        
+        return self.envelope(Sine(frequency, total_duration))
+
+    def square(self, frequency, key_duration):
+        total_duration = key_duration + self.envelope.releaseTime        
+        return self.envelope(Square(frequency, total_duration))
+
+    def sawtooth(self, frequency, key_duration):
+        total_duration = key_duration + self.envelope.releaseTime       
+        wave = SawTooth(frequency, total_duration) 
+        return self.envelope(wave)
+
+
+class Channel:
+
+    def __init__(self, n, samplerate=44100):
+
+        self.n = n
+        self.samplerate = samplerate
+        self.set_envelope()
+
+    def set_envelope(self, attackTime=0.2, decayTime=0.2, sustainLevel=0.5, releaseTime=0.2):
+
+        self.envelope = Envelope(
+            attackTime=attackTime,
+            decayTime=decayTime,
+            sustainLevel=sustainLevel,
+            releaseTime=releaseTime,
+            samplerate=self.samplerate
+        )
+
+        self.wave = WaveCreator(self.envelope)
 
 class Synth:
     
-    def __init__(self):
-        self.channels = Channel()
+    def __init__(self, total_channels=4):
+        self.channels = {k: Channel(n=k) for k in range(total_channels)}
 
     def play(self, channel=0, loop=False, blocking=False):
         signal = self.channels[channel]
@@ -105,6 +150,3 @@ class Synth:
 
     def set_channel(self, signal, channel, volume=1, smoothing=True):
         self.channels[channel] = volume * (smooth(signal) if smoothing else signal)
-    
-    def clear_channel(self, number):
-        self.channels[channel] = None
