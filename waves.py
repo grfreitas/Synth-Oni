@@ -4,16 +4,18 @@ import pandas as pd
 from scipy.signal import sawtooth, square
 from smoothing import smooth
 
+from adsr import Envelope
+
+
 FREQUENCY_DATA = pd.read_csv('utils/notesFrequencies')
 FREQUENCY_MAP = dict(zip(FREQUENCY_DATA.note, FREQUENCY_DATA.frequency))
 
 
 class Wave(np.ndarray):
 
-    signal = None
+    signal = None   
 
     def __new__(cls, frequency, duration, samplerate=44100):
-
         if isinstance(frequency, str):
             try:
                 frequency = FREQUENCY_MAP[frequency]
@@ -25,11 +27,9 @@ class Wave(np.ndarray):
 
         obj = np.asarray(cls.signal, dtype=np.float32).view(cls)
         obj.__setattr__('samplerate', samplerate)
+        obj.__setattr__('duration', duration)
 
         return obj
-
-    def _set_signal(self):
-        pass
 
 
 class SawTooth(Wave):
