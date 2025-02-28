@@ -1,3 +1,5 @@
+import os
+
 import random
 from adsr import Envelope
 
@@ -8,8 +10,10 @@ import sounddevice as sd
 from waves import SawTooth, Triangle, Square, Sine
 from smoothing import smooth
 
-FREQUENCY_DATA = pd.read_csv('utils/notesFrequencies')
+_script_dir = os.path.dirname(__file__)
+_file_path = os.path.join(os.path.dirname(__file__), 'utils', 'notesFrequencies')
 
+FREQUENCY_DATA = pd.read_csv(_file_path)
 FREQUENCY_MAP = dict(zip(FREQUENCY_DATA.note, FREQUENCY_DATA.frequency))
 
 WAVEFORM_MAP = {

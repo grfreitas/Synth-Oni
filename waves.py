@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import pandas as pd
 
@@ -7,7 +9,10 @@ from smoothing import smooth
 from adsr import Envelope
 
 
-FREQUENCY_DATA = pd.read_csv('utils/notesFrequencies')
+_script_dir = os.path.dirname(__file__)
+_file_path = os.path.join(os.path.dirname(__file__), 'utils', 'notesFrequencies')
+
+FREQUENCY_DATA = pd.read_csv(_file_path)
 FREQUENCY_MAP = dict(zip(FREQUENCY_DATA.note, FREQUENCY_DATA.frequency))
 
 
